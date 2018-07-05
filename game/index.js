@@ -56,7 +56,9 @@ function streak(board, firstCoor) {
 function stillPlaying(board) {
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      if (board.getIn([i, j]) === '_') return null;
+      const test = board.getIn([i, j]);
+      console.log(test);
+      if (test === '_') return null;
     }
   }
   return 'DRAW';
@@ -76,23 +78,32 @@ const move = (player, coord) => ({
 const MOVE = 'MOVE';
 const START = 'START';
 
-export default function reducer(state = board, action) {
-  // TODO
-  // console.log("action :", action, action.type)
-  // console.log("state :", state)
-  switch (action.type) {
-    case MOVE:
-      const updatedBoard = state.board.setIn(action.Coordinate, action.Player);
-      if (action.Player === 'X') action.Player = 'O';
-      else action.Player = 'X';
-      return { board: updatedBoard, turn: action.Player };
-    // return {turn: "X"}
-    case START:
-      const newBoard = refresh();
-      return { turn: 'O', board: newBoard };
-    default:
-      return state;
+export default function reducer(state = {}, action) {
+  if (action.type === 'MOVE') {
+    const nextBoard = boardReducer(state.board, action);
+    const winnerState = winner(nextBoard);
+    console.log('GGGGGG', winnerState);
+    return {
+      board: nextBoard,
+      turn: turnReducer(state.turn, action),
+      winner: winnerState,
+    };
+  } else if (action.type === 'START') {
+    const newBoard = refresh();
+    return { board: newBoard, winner: null, turn: 'X' };
   }
+}
+
+function turnReducer(turn = 'X', action) {
+  if (action.type === 'MOVE') {
+    return turn === 'X' ? 'O' : 'X';
+  }
+  return turn;
+}
+
+function boardReducer(board = Map(), action) {
+  if (action.type === MOVE) return board.setIn(action.coord, action.player);
+  return board;
 }
 
 export { move, start, winner };

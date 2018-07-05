@@ -11,7 +11,6 @@ const printBoard = () => {
     }
     process.stdout.write('\n');
   }
-  console.log('Winner', winner(board));
 };
 
 const getInput = player => async () => {
@@ -35,6 +34,17 @@ const game = createStore(gameReducer);
 // game.subscribe(() => console.log(game.getState()))
 
 game.subscribe(printBoard);
+game.subscribe(function() {
+  const { winner } = game.getState();
+
+  if (winner === 'X' || winner === 'O') {
+    console.log(winner + ' Wins!');
+    process.exit(0);
+  } else if (winner === 'DRAW') {
+    console.log('Draw!!!!');
+    process.exit(0);
+  }
+});
 game.subscribe(getInput('X'));
 game.subscribe(getInput('O'));
 
